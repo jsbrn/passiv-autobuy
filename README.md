@@ -27,4 +27,6 @@ You can supply the required information in a `.env` file to make automation easi
     TFA_SECRET = "exAmplESeCr3t"
 ```
 
+All the fields are optional.
+
 If you want to enable 2FA on your Passiv account and still run it via a cron job, set up an authenticator app and paste the 2FA secret into the `.env` file. Your authenticator app should have some kind of export function.
