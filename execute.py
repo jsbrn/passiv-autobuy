@@ -29,6 +29,7 @@ PLACE_ORDERS_ENDPOINT = 'portfolioGroups/<pgid>/calculatedtrades/<ctid>/placeOrd
 # Sign in
 print("Signing in...")
 
+# Ask for user input if credentials not found
 if EMAIL == None:
     EMAIL = input("Email: ")
 if (PASSWORD == None):
@@ -38,6 +39,7 @@ session = requests.session()
 login_response = session.post(API_URL + AUTH_ENDPOINT, data={'email': EMAIL, 'password': PASSWORD})
 login_response_json = login_response.json()
 
+# Handle two factor authentication
 jwt_header = {}
 tfa_code = ''
 if 'mfa_required' in login_response_json:
@@ -58,12 +60,14 @@ if jwt_header == {}:
 print("Success!")
 print("Fetching available orders...")
 
+# Fetch the portfolio groups
 portfolio_groups_response = session.get(API_URL + "portfolioGroups/", headers=jwt_header)
 groups = portfolio_groups_response.json()
 
 for group in groups:
     group_info = session.get(API_URL + PG_INFO_ENDPOINT.replace('<id>', group['id']), headers=jwt_header).json()
     print(group['name']+':')
+    # Find the calculated trades
     if 'calculated_trades' in group_info:
         calculated_trades = group_info['calculated_trades']
 
@@ -71,9 +75,11 @@ for group in groups:
             print(" (none)")
             continue
 
+        # List each potential trade
         for trade in calculated_trades['trades']:
             print(' - '+trade['action']+" "+str(trade['units'])+" "+trade['universal_symbol']['symbol']+" @ $"+str(trade['price'])+str(trade['universal_symbol']['currency']['code']))
 
+        # Check the impact of the trade beforehand, otherwise execute the trades if user allows
         impact = session.get(API_URL + IMPACT_ENDPOINT.replace('<pgid>', group['id']).replace('<ctid>', calculated_trades['id']), headers=jwt_header).json()
         if 'detail' in impact:
             print(impact['detail'])
