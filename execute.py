@@ -66,8 +66,14 @@ for group in groups:
     print(group['name']+':')
     if 'calculated_trades' in group_info:
         calculated_trades = group_info['calculated_trades']
+
+        if len(calculated_trades['trades']) == 0:
+            print(" (none)")
+            continue
+
         for trade in calculated_trades['trades']:
             print(' - '+trade['action']+" "+str(trade['units'])+" "+trade['universal_symbol']['symbol']+" @ $"+str(trade['price'])+str(trade['universal_symbol']['currency']['code']))
+
         impact = session.get(API_URL + IMPACT_ENDPOINT.replace('<pgid>', group['id']).replace('<ctid>', calculated_trades['id']), headers=jwt_header).json()
         if 'detail' in impact:
             print(impact['detail'])
